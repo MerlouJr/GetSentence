@@ -20,6 +20,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -83,18 +85,16 @@ public class MainActivity extends AppCompatActivity {
     BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            // internet lost alert dialog method call from here...
             AsyncTask.execute(new Runnable() {
                 @Override
                 public void run() {
                     //TODO your background code
-                    saveThisBiatch();
+                        saveThisBiatch();
+                        deleteFile(file);
                 }
             });
         }
     };
-
-
 
     @Override
     protected void onDestroy() {
@@ -103,31 +103,30 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void saveThisBiatch(){
-
         try {
         FileInputStream fin = openFileInput(file);
         int c2;
         String temp2 = "";
-        String separator = ",";
 
         while ((c2 = fin.read()) != -1) {
             temp2 = temp2 + Character.toString((char) c2);
-
         }
-        //String[] separate = temp2.split(separator);
-        DatabaseReference databaseLog = FirebaseDatabase.getInstance().getReference("string");
-        Sentence sen = new Sentence();
-            sen.setSentence(temp2);
-        String userLog = databaseLog.push().getKey();
-        databaseLog.child(userLog).setValue(sen);
-        Toast.makeText(getApplication(), "file save to db", Toast.LENGTH_LONG).show();
-        deleteFile(file);
+            ArrayList aList= new ArrayList(Arrays.asList(temp2.split(",")));
+            for(int i=0;i<aList.size();i++)
+            {
+                String array = aList.get(i).toString();
+                DatabaseReference databaseLog = FirebaseDatabase.getInstance().getReference("string");
+                Sentence sen = new Sentence();
+                sen.setSentence(array);
+                String userLog = databaseLog.push().getKey();
+                databaseLog.child(userLog).setValue(sen);
+            }
         } catch (Exception e) {
         }
+
     }
 
 public void deleteFile(){
-
     deleteFile(file);
 }
     public boolean isOnline() {
